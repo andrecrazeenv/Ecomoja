@@ -1,6 +1,6 @@
 import Head from 'next/head';
 import * as React from 'react';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Button, TextField } from '@mui/material';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
@@ -15,11 +15,13 @@ const Login = () => {
 	} = useContext(UIContext);
 	
 	const { login } = useContext<AuthState>(AuthContext);
+	const [ errorMessage, setErrorMessage ] = useState("");
 
 	const {
 		register,
 		handleSubmit,
 		formState: { errors },
+		setError,
 	} = useForm();
 
 	const onSubmit = (data) => {
@@ -33,7 +35,18 @@ const Login = () => {
 					type: 'SET_LOADING',
 					payload: false,
 				});
-			});
+			})
+		// Catching the error of incorrect password
+			.catch((ex) => {
+				setErrorMessage("Login failed.");
+				setError(('email'), {});
+				setError(('password'), {});
+				dispatch({
+						type: 'SET_LOADING',
+						payload: false,
+					});
+				});
+			};
 	};
 
 	useEffect(() => {
@@ -76,8 +89,8 @@ const Login = () => {
 									id='email'
 									label='Email'
 									variant='standard'
-									helperText={errors.email && 'Email is required'}
-									{...register('email', { required: true })}
+									helperText={errors.email && errors.email.message}
+									{...register('email', { required: 'Email is required' })}
 								/>
 							</div>
 							<div className='mb-6'>
@@ -88,10 +101,18 @@ const Login = () => {
 									label='Password' 
 									variant='standard'
 									type='password'
-									helperText={errors.password && 'Incorrect entry.'}
-									{...register('password', { required: true })}
+									helperText={errors.password && errors.password.message ? 'Incorrect entry' : ''}
+									{...register('password', { required: 'Password is required' })}
 								/>
 							</div>
+
+							{ // this sets the error message on the UI when user enters an invalid password or email address
+								errorMessage && 
+								<div className='error'>
+								 {errorMessage}
+								</ div>
+							}
+
 							<div>
 								<Button variant="contained" type="submit">Log in</Button>
 							</div>

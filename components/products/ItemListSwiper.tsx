@@ -35,7 +35,7 @@ const ItemListSwiper = ({ items, component }: ItemListSwiperProps) => {
 	return (
 		<div>
 			<Slider {...settings}>
-				{items.map((item) => (
+				{items && Array.isArray(items) && items.map((item) => (
 					<div key={item.id}>
 						<ItemComponent item={item} />
 					</div>
